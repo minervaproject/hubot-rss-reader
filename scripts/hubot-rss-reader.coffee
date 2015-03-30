@@ -93,7 +93,7 @@ module.exports = (robot) ->
   robot.respond /rss\s+(add|register)\s+(https?:\/\/[^\s]+)$/im, (msg) ->
     url = msg.match[2].trim()
     last_state_is_error[url] = false
-    logger.info "add #{url}"
+    logger.info "add #{url} to #{msg.message.user.reply_to}"
     checker.addFeed msg.message.user.reply_to, url
     .then (res) ->
       new Promise (resolve) ->
