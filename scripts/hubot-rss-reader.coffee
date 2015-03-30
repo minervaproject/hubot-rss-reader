@@ -94,23 +94,23 @@ module.exports = (robot) ->
     url = msg.match[2].trim()
     last_state_is_error[url] = false
     logger.info "add #{url}"
-    checker.addFeed msg.message.room, url
+    checker.addFeed msg.message.user.reply_to, url
     .then (res) ->
       new Promise (resolve) ->
         msg.send res
         resolve url
     .then (url) ->
-      checker.fetch {url: url, room: msg.message.room}
+      checker.fetch {url: url, room: msg.message.user.reply_to}
     .then (entries) ->
       for entry in entries.splice(0,5)
-        send {room: msg.message.room}, entry.toString()
+        send {room: msg.message.user.reply_to}, entry.toString()
       if entries.length > 0
-        send {room: msg.message.room},
+        send {room: msg.message.user.reply_to},
         "#{process.env.HUBOT_RSS_HEADER} #{entries.length} entries has been omitted"
     , (err) ->
       msg.send "[ERROR] #{err}"
       return if err.message isnt 'Not a feed'
-      checker.deleteFeed msg.message.room, url
+      checker.deleteFeed msg.message.user.reply_to, url
       .then ->
         FindRSS url
       .then (feeds) ->
@@ -127,7 +127,7 @@ module.exports = (robot) ->
   robot.respond /rss\s+delete\s+(https?:\/\/[^\s]+)$/im, (msg) ->
     url = msg.match[1].trim()
     logger.info "delete #{url}"
-    checker.deleteFeed msg.message.room, url
+    checker.deleteFeed msg.message.user.reply_to, url
     .then (res) ->
       msg.send res
     .catch (err) ->
@@ -145,7 +145,7 @@ module.exports = (robot) ->
       logger.error err.stack
 
   robot.respond /rss\s+list$/i, (msg) ->
-    feeds = checker.getFeeds msg.message.room
+    feeds = checker.getFeeds msg.message.user.reply_to
     if feeds.length < 1
       msg.send "nothing"
     else
